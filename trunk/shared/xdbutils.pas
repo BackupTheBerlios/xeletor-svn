@@ -10,7 +10,7 @@ unit XDBUtils;
 interface
 
 uses
-  Classes, SysUtils, AVL_Tree, CodeToolsStructs, FileProcs;
+  Classes, SysUtils, AVL_Tree, CodeToolsStructs, FileUtil, LazLogger;
 
 type
   PFPList = ^TFPList;
@@ -76,7 +76,6 @@ type
     property Tree: TMTAVLTree read FTree; // tree of PGenericStringMapItem
     function Equals(OtherTree: TBaseStringMap): boolean; reintroduce;
     procedure WriteDebugReport;
-    function CalcMemSize: PtrUint;
     property CompareItemsFunc: TListSortCompare read GetCompareItemsFunc;
     property CompareKeyItemFunc: TListSortCompare read FCompareKeyItemFunc;
     procedure SetCompareFuncs(
@@ -446,7 +445,7 @@ begin
     Result:=Executable
   else
     Result:=SearchFileInPath(Executable,'',GetProgramSearchPath,':',
-                             ctsfcDefault);
+                             [sffDontSearchInBasePath]);
 end;
 
 function DateTimeToXDBStr(const ADateTime: TDateTime): string;
@@ -733,23 +732,6 @@ begin
     Item:=PStringToStringTreeItem(Node.Data);
     DebugLn([Item^.Name]);
     Node:=Tree.FindSuccessor(Node);
-  end;
-end;
-
-function TBaseStringMap.CalcMemSize: PtrUint;
-var
-  Node: TAVLTreeNode;
-  Item: PBaseStringMapItem;
-begin
-  Result:=PtrUInt(InstanceSize)
-    +PtrUInt(FTree.InstanceSize)
-    +PtrUint(FTree.Count)*SizeOf(TAVLTreeNode);
-  Node:=FTree.FindLowest;
-  while Node<>nil do begin
-    Item:=PBaseStringMapItem(Node.Data);
-    inc(Result,MemSizeString(Item^.Name)
-       +SizeOf(TBaseStringMapItem));
-    Node:=FTree.FindSuccessor(Node);
   end;
 end;
 

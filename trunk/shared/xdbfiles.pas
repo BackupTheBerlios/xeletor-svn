@@ -12,8 +12,8 @@ unit XDBFiles;
 interface
 
 uses
-  Classes, SysUtils, AVL_Tree, FileProcs, CodeToolsStructs, fgl,
-  xdbutils, laz2_DOM, laz2_XMLRead;
+  Classes, SysUtils, AVL_Tree, CodeToolsStructs, fgl,
+  xdbutils, laz2_DOM, laz2_XMLRead, LazUTF8, LazFileUtils, LazLogger;
 
 const
   XDBTypeArraySize = High(integer) div 2;
@@ -1069,7 +1069,7 @@ function TXDBNode.FindChildWithPath(Path: PChar;
 
   procedure RaiseUnexpectedChar(Expected: char; Expr: PChar);
   begin
-    raise Exception.Create('TXDBNode.FindChildWithPath: expected '+Expected+', but found "'+dbgstr(Expr)+'"');
+    raise Exception.Create('TXDBNode.FindChildWithPath: expected '+Expected+', but found "'+DbgStr(Expr)+'"');
   end;
 
 var

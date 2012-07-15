@@ -10,11 +10,11 @@ unit xdbcentral;
 interface
 
 uses
-  Classes, SysUtils, FileProcs,
+  Classes, SysUtils,
   {$IFDEF Linux}
   inotify,
   {$ENDIF}
-  CodeToolsStructs, laz2_DOM, laz2_XMLRead, MTProcs,
+  CodeToolsStructs, laz2_DOM, laz2_XMLRead, LazLogger, LazFileUtils, MTProcs,
   xdblog, XFileWatch, xdbfiles, xdbutils;
 
 type
@@ -148,7 +148,7 @@ begin
       Result:=TXDBDocument(aFile);
     end else begin
       if not ExceptionIfNotFound then exit;
-      raise Exception.Create('file is directory: '+dbgstr(Path));
+      raise Exception.Create('file is directory: '+DbgStr(Path));
     end;
   end else if CreateIfNotExists then begin
     Result:=TXDBDocument.Create(FileName);
@@ -515,7 +515,7 @@ var
   begin
     if Terminating then exit;
     aPath:=AppendPathDelim(DiskDir);
-    if FindFirstUTF8(aPath+FileMask,faAnyFile,FileInfo)=0 then begin
+    if FindFirstUTF8(aPath+AllFilesMask,faAnyFile,FileInfo)=0 then begin
       repeat
         if (FileInfo.Name='') or (FileInfo.Name[1]='.') then
           continue;

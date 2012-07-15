@@ -1,1 +1,2 @@
-Tested with FPC 2.7.1 revision 19249
+See Install.txt on how to compile.
+
