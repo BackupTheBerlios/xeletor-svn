@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Package Version="4">
+    <Name Value="XeletorClient"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <SearchPaths>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <Conditionals Value="if TargetOS = 'darwin' then begin
+  UsageCustomOptions += ' -k-macosx_version_min -k10.5';
+  UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.5.sdk/';
+end;"/>
+      <Other>
+        <CompilerMessages>
+          <UseMsgFile Value="True"/>
+        </CompilerMessages>
+        <CompilerPath Value="$(CompPath)"/>
+      </Other>
+    </CompilerOptions>
+    <Files Count="7">
+      <Item1>
+        <Filename Value="xdbutils.pas"/>
+        <UnitName Value="XDBUtils"/>
+      </Item1>
+      <Item2>
+        <Filename Value="xdbfiles.pas"/>
+        <UnitName Value="XDBFiles"/>
+      </Item2>
+      <Item3>
+        <Filename Value="xdbprocess.pas"/>
+        <UnitName Value="XDBProcess"/>
+      </Item3>
+      <Item4>
+        <Filename Value="xdblog.pas"/>
+        <UnitName Value="xdblog"/>
+      </Item4>
+      <Item5>
+        <Filename Value="inotify.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="inotify"/>
+      </Item5>
+      <Item6>
+        <Filename Value="xfilewatch.pas"/>
+        <UnitName Value="XFileWatch"/>
+      </Item6>
+      <Item7>
+        <Filename Value="xdbcgi.pas"/>
+        <UnitName Value="XDBCGI"/>
+      </Item7>
+    </Files>
+    <Type Value="RunAndDesignTime"/>
+    <RequiredPkgs Count="2">
+      <Item1>
+        <PackageName Value="CodeTools"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="FCL"/>
+      </Item2>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
