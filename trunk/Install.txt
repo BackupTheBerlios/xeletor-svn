@@ -1,0 +1,68 @@
+Welcome to Xeletor
+
+Xeletor was successfully tested with:
+fpc 2.7.1 revision 19326
+lazarus 0.9.31 revision 33356
+multithreadproc revision 2053
+
+*********************************************
+* FPC - Free Pascal Compiler
+*********************************************
+
+1. Download and install the latest release of FPC.
+http://www.freepascal.org/download.var
+
+2. Download, compile and install the fpc svn:
+cd ~/your/choice
+svn checkout http://svn.freepascal.org/svn/fpc/trunk fpc -r 19326
+cd fpc
+make distclean all
+For Linux:
+sudo make install INSTALL_PREFIX=/usr
+For OS X:
+sudo make install INSTALL_PREFIX=/usr/local
+
+3. Test the compiler
+fpc -v
+Should return 2.7.1
+
+
+*********************************************
+* Lazarus - IDE and many extra packages
+*********************************************
+
+1. Download and compile
+cd ~/your/choice
+svn co http://svn.freepascal.org/svn/lazarus/trunk lazarus -r 33356
+cd lazarus
+make clean lazbuild
+sudo cp lazbuild /usr/bin/lazbuild
+
+2. Test
+lazbuild components/codetools/codetools.lpk
+
+
+*********************************************
+* Multithreadprocs
+*********************************************
+
+1. Download and compile
+cd ~/your/choice
+svn co https://lazarus-ccr.svn.sourceforge.net/svnroot/lazarus-ccr/components/multithreadprocs multithreadprocs -r 2053
+lazbuild multithreadprocs/multithreadprocslaz.lpk
+
+
+*********************************************
+* Xeletor
+*********************************************
+
+1. Download and compile
+cd ~/your/choice
+svn co svn+ssh://USERNAME@dare.uni-koeln.de/usr/local/svnrepos/xeletor xeletor
+lazbuild xeletor/server/xeletor.lpi
+
+2. Install
+sudo cp xeletor/server/xeletor /usr/bin/xeletor
+
+3. Test
+xeletor -d test=xeletor/examples --allow-from=127.0.0.1
