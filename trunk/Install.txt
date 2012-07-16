@@ -1,8 +1,10 @@
 Welcome to Xeletor
 
+Xeletor requires FPC, Lazarus and Multithreadedprocs.
+
 Xeletor was successfully tested with:
-fpc 2.7.1 revision 19326
-lazarus 0.9.31 revision 33356
+fpc 2.7.1 revision 21787
+lazarus 1.0 revision 37949
 multithreadproc revision 2053
 
 *********************************************
@@ -12,17 +14,19 @@ multithreadproc revision 2053
 1. Download and install the latest release of FPC.
 http://www.freepascal.org/download.var
 
-2. Download, compile and install the fpc svn:
+2. Download and compile the fpc svn:
 cd ~/your/choice
-svn checkout http://svn.freepascal.org/svn/fpc/trunk fpc -r 19326
+svn checkout http://svn.freepascal.org/svn/fpc/trunk fpc -r 21787
 cd fpc
 make distclean all
+
+3. Install fpc:
 For Linux:
 sudo make install INSTALL_PREFIX=/usr
 For OS X:
-sudo make install INSTALL_PREFIX=/usr/local
+sudo make install
 
-3. Test the compiler
+4. Test the compiler
 fpc -v
 Should return 2.7.1
 
@@ -33,7 +37,7 @@ Should return 2.7.1
 
 1. Download and compile
 cd ~/your/choice
-svn co http://svn.freepascal.org/svn/lazarus/trunk lazarus -r 33356
+svn checkout http://svn.freepascal.org/svn/lazarus/trunk lazarus -r 37949
 cd lazarus
 make clean lazbuild
 sudo cp lazbuild /usr/bin/lazbuild
@@ -48,7 +52,7 @@ lazbuild components/codetools/codetools.lpk
 
 1. Download and compile
 cd ~/your/choice
-svn co https://lazarus-ccr.svn.sourceforge.net/svnroot/lazarus-ccr/components/multithreadprocs multithreadprocs -r 2053
+svn checkout https://lazarus-ccr.svn.sourceforge.net/svnroot/lazarus-ccr/components/multithreadprocs multithreadprocs -r 2053
 lazbuild multithreadprocs/multithreadprocslaz.lpk
 
 
@@ -58,7 +62,7 @@ lazbuild multithreadprocs/multithreadprocslaz.lpk
 
 1. Download and compile
 cd ~/your/choice
-svn co svn+ssh://USERNAME@dare.uni-koeln.de/usr/local/svnrepos/xeletor xeletor
+svn checkout http://svn.berlios.de/svnroot/repos/xeletor/trunk xeletor
 lazbuild xeletor/server/xeletor.lpi
 
 2. Install
@@ -66,3 +70,4 @@ sudo cp xeletor/server/xeletor /usr/bin/xeletor
 
 3. Test
 xeletor -d test=xeletor/examples --allow-from=127.0.0.1
+
