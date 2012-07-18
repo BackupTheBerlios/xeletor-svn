@@ -34,7 +34,8 @@ uses
   {$IFDEF UNIX}
   cthreads,
   {$ENDIF}
-  Classes, fpcunitconsolerunner, consoletestrunner, dom;
+  Classes, fpcunitconsolerunner, consoletestrunner, dom, fpcunit, testregistry,
+  testxdb, testglobals;
 
 type
 
@@ -81,8 +82,8 @@ var
   var
     n: TDOMElement;
   begin
-    n := Doc.CreateElement(name);
-    n.AppendChild(Doc.CreateTextNode(value));
+    n := Doc.CreateElement(UTF8Decode(name));
+    n.AppendChild(Doc.CreateTextNode(UTF8Decode(value)));
     env.AppendChild(n);
   end;
 begin
@@ -92,6 +93,13 @@ begin
   Doc.FirstChild.AppendChild(env);
 end;
 
+var
+  App: TXeletorTestRunner;
 begin
+  App := TXeletorTestRunner.Create(nil);
+  App.Initialize;
+  App.Title := 'FPCUnit Console runner for the Xeletor Test Suite.';
+  App.Run;
+  App.Free;
 end.
 

@@ -32,17 +32,30 @@
         <FormatVersion Value="1"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="1">
+    <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="fpcunitconsolerunner"/>
+        <PackageName Value="XeletorClient"/>
       </Item1>
+      <Item2>
+        <PackageName Value="fpcunitconsolerunner"/>
+      </Item2>
     </RequiredPackages>
-    <Units Count="1">
+    <Units Count="3">
       <Unit0>
         <Filename Value="runtests.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="runtests"/>
       </Unit0>
+      <Unit1>
+        <Filename Value="testxdb.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TestXDB"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="testglobals.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="testglobals"/>
+      </Unit2>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
