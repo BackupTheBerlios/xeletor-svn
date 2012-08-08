@@ -117,6 +117,7 @@ type
       var AResponse: TFPHTTPConnectionResponse);
     // Tests
     procedure TestRead1;
+    procedure TestListErrors;
     procedure TestMultiReadExclusiveWrite;
     procedure TestStrToIP(Quiet: boolean = true);
     procedure TestAllowDeny(Quiet: boolean = true);
@@ -262,6 +263,7 @@ begin
 
   // test
   //WaitTillFilesScanned;
+  //TestListErrors;
   //TestRead1;
   //for i:=0 to 1000 do Sleep(1000);
   //TestFindNodes('doc(darems/manuscriptsWithoutScans/arab.MSS)//msIdentifier');
@@ -978,6 +980,19 @@ begin
   XDoc.CreateTreeFromXML;
   writeln(XDoc.Root.GetXML);
   debugln(['TXeletorApplication.TestRead1 END']);
+end;
+
+procedure TXeletorApplication.TestListErrors;
+var
+  Item: PStringToPointerTreeItem;
+  ScanError: TXDBScanError;
+begin
+  WaitTillFilesScanned;
+  debugln(['TXeletorApplication.TestListErrors Count=',Storage.ErrorFiles.Count]);
+  for Item in Storage.ErrorFiles do begin
+    ScanError:=TXDBScanError(Item^.Value);
+    debugln(['  <file path="'+StrToXMLValue(Item^.Name)+'" error="'+StrToXMLValue(ScanError.Msg)+'"/>']);
+  end;
 end;
 
 procedure TXeletorApplication.TestMultiReadExclusiveWrite;

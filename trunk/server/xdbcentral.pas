@@ -380,6 +380,7 @@ function TXDBStorage.ReadXMLFile(const DBFilename: string; out doc: TXDBDocument
     p: SizeInt;
     NewDoc: TXDBDocument;
   begin
+    Result:=false;
     try
       Age:=FileAgeUTF8(Filename);
       XMLDoc:=nil;
