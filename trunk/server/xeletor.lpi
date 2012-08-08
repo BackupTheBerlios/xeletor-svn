@@ -36,7 +36,7 @@
     <RequiredPackages Count="3">
       <Item1>
         <PackageName Value="XeletorClient"/>
-        <DefaultFilename Value="../shared/xeletorclient.lpk"/>
+        <DefaultFilename Value="../shared/xeletorclient.lpk" Prefer="True"/>
       </Item1>
       <Item2>
         <PackageName Value="MultiThreadProcsLaz"/>
