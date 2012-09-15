@@ -291,20 +291,28 @@ procedure DownloadXML(const URL: string; out doc: TXMLDocument);
 var
   client: TFPHTTPClient;
   ms: TMemoryStream;
-  ok: Boolean;
+  downloadok: Boolean;
 begin
   doc:=nil;
   client:=TFPHTTPClient.Create(nil);
-  ok:=false;
+  downloadok:=false;
   ms:=TMemoryStream.Create;
   try
-    client.Get(URL,ms);
-    ok:=true;
-    ms.Position:=0;
-    ReadXMLFile(doc,ms);
+    try
+      client.Get(URL,ms);
+      downloadok:=true;
+      ms.Position:=0;
+      ReadXMLFile(doc,ms);
+    except
+      on E: Exception do begin
+        if not downloadok then
+          E.Message:=E.Message+', DownloadXML download failed URL="'+dbgstr(URL)+'"'
+        else
+          E.Message:=E.Message+', DownloadXML parse failed URL="'+dbgstr(URL)+'"';
+        raise;
+      end;
+    end;
   finally
-    if not ok then
-      debugln(['DownloadXML URL="',URL,'"']);
     client.Free;
     ms.Free;
   end;
