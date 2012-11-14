@@ -2,20 +2,20 @@
   This source is only used to compile and install the package.
  }
 
-unit XeletorClient; 
+unit XeletorClient;
 
 interface
 
 uses
-  XDBUtils, XDBFiles, XDBProcess, xdblog, XFileWatch, XDBCGI, 
-  LazarusPackageIntf;
+  XDBUtils, XDBFiles, XDBProcess, xdblog, XFileWatch, XDBCGI, XPath_Simple, 
+  xdbfphttpclient, LazarusPackageIntf;
 
 implementation
 
-procedure Register; 
+procedure Register;
 begin
-end; 
+end;
 
 initialization
-  RegisterPackage('XeletorClient', @Register); 
+  RegisterPackage('XeletorClient', @Register);
 end.

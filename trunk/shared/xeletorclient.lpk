@@ -18,7 +18,7 @@ end;"/>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="7">
+    <Files Count="9">
       <Item1>
         <Filename Value="xdbutils.pas"/>
         <UnitName Value="XDBUtils"/>
@@ -48,6 +48,14 @@ end;"/>
         <Filename Value="xdbcgi.pas"/>
         <UnitName Value="XDBCGI"/>
       </Item7>
+      <Item8>
+        <Filename Value="xpath_simple.pp"/>
+        <UnitName Value="XPath_Simple"/>
+      </Item8>
+      <Item9>
+        <Filename Value="xdbfphttpclient.pp"/>
+        <UnitName Value="xdbfphttpclient"/>
+      </Item9>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">
