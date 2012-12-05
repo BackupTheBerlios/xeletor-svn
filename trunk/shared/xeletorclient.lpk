@@ -54,6 +54,7 @@ end;"/>
       </Item8>
       <Item9>
         <Filename Value="xdbfphttpclient.pp"/>
+        <AddToUsesPkgSection Value="False"/>
         <UnitName Value="xdbfphttpclient"/>
       </Item9>
     </Files>
