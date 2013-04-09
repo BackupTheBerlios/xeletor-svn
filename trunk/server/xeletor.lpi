@@ -33,7 +33,7 @@
         <LaunchingApplication PathPlusParams="/usr/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="3">
+    <RequiredPackages Count="2">
       <Item1>
         <PackageName Value="XeletorClient"/>
         <DefaultFilename Value="../shared/xeletorclient.lpk" Prefer="True"/>
@@ -41,9 +41,6 @@
       <Item2>
         <PackageName Value="MultiThreadProcsLaz"/>
       </Item2>
-      <Item3>
-        <PackageName Value="CodeTools"/>
-      </Item3>
     </RequiredPackages>
     <Units Count="7">
       <Unit0>
