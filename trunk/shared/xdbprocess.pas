@@ -204,7 +204,7 @@ begin
     end;
     TheProcess.WaitOnExit;
     Code:=TheProcess.ExitStatus;
-    if Code<>0 then begin
+    if (Code<>0) or (ErrMsg<>'') then begin
       if ErrMsg<>'' then ErrMsg:=LineEnding+ErrMsg;
       ErrMsg:='xsltproc failed with exit code '+IntToStr(Code)+ErrMsg;
       raise Exception.Create(ErrMsg);
