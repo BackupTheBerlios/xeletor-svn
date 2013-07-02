@@ -56,6 +56,8 @@ uses
 
 const
   Version = '1.2';
+  // 1.2 signals HUP, KILL, TERM, QUIT
+  // 1.3 disable stop action by default
 type
 
   { TAllowDenyFromItem }
@@ -83,6 +85,7 @@ type
   TXeletorApplication = class(TCustomApplication)
   private
     FSingleThreaded: boolean;
+    FStopViaHTTPEnabled: boolean;
     procedure ErrorRespond(ARequest: TFPHTTPConnectionRequest;
       AResponse: TFPHTTPConnectionResponse; Code: integer;
       Msg: string);
@@ -169,6 +172,7 @@ type
     procedure ReloadConfiguration;
 
     property SingleThreaded: boolean read FSingleThreaded write FSingleThreaded;
+    property StopViaHTTPEnabled: boolean read FStopViaHTTPEnabled write FStopViaHTTPEnabled ;
   end;
 
 var
@@ -663,7 +667,7 @@ procedure TXeletorApplication.ServerRequest(Sender: TObject;
 var
   URL : String;
   p: SizeInt;
-  Scheme: String;
+  Action: String;
 begin
   //debugln(['TXeletorApplication.ServerRequest Command=',ARequest.Command,' CommandLine=',ARequest.CommandLine,' URI=',ARequest.URI,' QueryString=',ARequest.QueryString]);
   URL:=ARequest.Url;
@@ -676,29 +680,29 @@ begin
   end;
   if URL[1]='/' then System.Delete(URL,1,1);
 
-  // check scheme
+  // check Action
   p:=Pos('?',URL);
-  Scheme:=lowercase(copy(URL,1,p-1));
+  Action:=lowercase(copy(URL,1,p-1));
   URL:=copy(URL,p+1,length(URL));
   URL:=HTTPDecode(URL);
-  if Scheme='doc' then begin
+  if Action='doc' then begin
     HandleRequestDoc(URL,ARequest,AResponse);
-  end else if Scheme='listdocs' then begin
+  end else if Action='listdocs' then begin
     HandleRequestListDocs(URL,ARequest,AResponse,false);
-  end else if Scheme='listdocsext' then begin
+  end else if Action='listdocsext' then begin
     HandleRequestListDocs(URL,ARequest,AResponse,true);
-  end else if Scheme='finddocs' then begin
+  end else if Action='finddocs' then begin
     HandleRequestFindDocs(URL,ARequest,AResponse);
-  end else if Scheme='findnodes' then begin
+  end else if Action='findnodes' then begin
     HandleRequestFindNodes(URL,ARequest,AResponse);
-  end else if (Scheme='') and (URL='rescan') then begin
+  end else if (Action='') and (URL='rescan') then begin
     HandleRequestRescan(URL,ARequest,AResponse);
-  end else if (Scheme='') and (URL='listerrors') then begin
+  end else if (Action='') and (URL='listerrors') then begin
     HandleRequestListErrors(URL,ARequest,AResponse);
-  end else if (Scheme='') and (URL='stop') then begin
+  end else if (Action='') and (URL='stop') then begin
     HandleRequestStop(URL,ARequest,AResponse);
   end else begin
-    ErrorRespond(ARequest,AResponse,404,'invalid scheme "'+dbgstr(Scheme)+'"');
+    ErrorRespond(ARequest,AResponse,404,'invalid action "'+dbgstr(Action)+'"');
     exit;
   end;
 end;
@@ -1024,6 +1028,10 @@ procedure TXeletorApplication.HandleRequestStop(Path: string;
 var
   ss: TStringStream;
 begin
+  if not StopViaHTTPEnabled then begin
+    ErrorRespond(ARequest,AResponse,404,'invalid scheme "stop"');
+    exit;
+  end;
   AResponse.ContentType:='text/html';
   ss:=TStringStream.Create('<HTML><BODY>'#13#10
            +'Stopping Xeletor ...'#13#10
