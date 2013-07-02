@@ -47,7 +47,7 @@ program xeletor;
 
 uses
   {$IFDEF UNIX}
-  cthreads,
+  cthreads, BaseUnix,
   {$ENDIF}
   //heaptrc,
   Classes, SysUtils, Sockets, fgl, CustApp, AVL_Tree, laz2_XMLRead, laz2_DOM,
@@ -166,8 +166,81 @@ type
     procedure WriteHelp(WithHeader: boolean); virtual;
     procedure Terminate; override;
 
+    procedure ReloadConfiguration;
+
     property SingleThreaded: boolean read FSingleThreaded write FSingleThreaded;
   end;
+
+var
+  Application: TXeletorApplication;
+
+{$IFDEF Unix}
+procedure SignalCapture(Signal: longint); cdecl;
+begin
+  case signal of
+    SIGHUP:
+      begin
+        Application.Log(etInfo,'Signal HUP');
+        Application.ReloadConfiguration;
+      end;
+    SIGINT:
+      begin
+        Application.Log(etInfo,'Signal INT');
+        Application.Terminate;
+      end;
+    SIGQUIT:
+      begin
+        Application.Log(etInfo,'Signal QUIT');
+        Application.Terminate;
+      end;
+    SIGKILL:
+      begin
+        Application.Log(etInfo,'Signal KILL');
+        Application.Terminate;
+      end;
+    SIGTerm:
+      begin
+        Application.Log(etInfo,'Signal TERM');
+        Application.Terminate;
+      end;
+    else
+      Application.Log(etInfo,'Unknown signal: '+IntToStr(Signal));
+  end;
+end;
+
+procedure AddTrap(Signal: longint);
+var
+  NewAction, OldAction: PSigActionRec;
+begin
+  New(NewAction);
+  New(OldAction);
+
+  NewAction^.sa_Handler := SigActionHandler(@SignalCapture);
+  FillByte(NewAction^.Sa_Mask,SizeOf(NewAction^.sa_mask),0);
+  NewAction^.Sa_Flags := 0;
+  {$IFDEF Linux} // Linux specific
+    NewAction^.Sa_Restorer := Nil;
+  {$ENDIF}
+  if FPSigaction(Signal, NewAction, OldAction) <> 0 then begin
+    if Signal <> SIGKILL then begin
+      Application.Log(etError,'unable to trap signal: '+IntToStr(fpgeterrno));
+      halt(1);
+    end;
+  end;
+
+  Dispose(NewAction);
+  Dispose(OldAction);
+end;
+
+procedure TrapSignals;
+begin
+  AddTrap(SIGHUP);
+  AddTrap(SIGINT);
+  AddTrap(SIGQUIT);
+  AddTrap(SIGTerm);
+  AddTrap(SIGKILL);
+end;
+{$ENDIF}
 
 constructor TAllowDenyFromItem.Create(AnAllow: boolean; const anIP,
   aNet: in_addr);
@@ -288,6 +361,9 @@ begin
     Server.OnAllowConnect:=@ServerAllowConnect;
     Server.OnRequest:=@ServerRequest;
     Server.ActivateViaThread;
+    {$IFDEF Unix}
+    TrapSignals;
+    {$ENDIF}
     LastRescan:=Now;
     repeat
       Sleep(50);
@@ -1546,8 +1622,11 @@ begin
     Storage.Terminating:=true;
 end;
 
-var
-  Application: TXeletorApplication;
+procedure TXeletorApplication.ReloadConfiguration;
+begin
+  Log(etInfo,'reloading configuration not yet implemented, rescanning files ...');
+  RescanFiles;
+end;
 
 begin
   Application:=TXeletorApplication.Create(nil);

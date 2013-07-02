@@ -10,7 +10,8 @@ unit xdbhttpserver;
 interface
 
 uses
-  Classes, SysUtils, FileProcs, xdbfphttpserver, Sockets, xdblog;
+  Classes, SysUtils, FileProcs, xdbfphttpserver, Sockets,
+  xdblog;
 
 type
   TXDBHttpServer = class;
