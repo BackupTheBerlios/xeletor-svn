@@ -55,9 +55,9 @@ uses
   xdbHTTPDefs, CodeToolsStructs, xdbutils, xdbfiles, xdblog, xdbcentral;
 
 const
-  Version = '1.2';
+  Version = '1.3';
   // 1.2 signals HUP, KILL, TERM, QUIT
-  // 1.3 disable stop action by default
+  // 1.3 disable http action 'stop' by default
 type
 
   { TAllowDenyFromItem }
