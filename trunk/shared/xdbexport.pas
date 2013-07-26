@@ -52,109 +52,13 @@ uses
     #12 : '\f'
     #13 : '\r'
 *)
-procedure SaveNodeAsJSON(Node: TXDBNode; aStream: TStream; Indent: integer = 0);
-function NodeAsJSON(Node: TXDBNode; Indent: integer = 0): string;
+procedure SaveNodeAsJSON(Node: TXDBNode; aStream: TStream; Indent: integer = 0;
+  WithEnvelope: boolean = true);
+function NodeAsJSON(Node: TXDBNode; Indent: integer = 0;
+  WithEnvelope: boolean = true): string;
 procedure WriteJSONString(const Value: string; aStream: TStream);
 
 implementation
-
-procedure SaveNodeAsJSON(Node: TXDBNode; aStream: TStream; Indent: integer);
-
-  procedure WriteIndent;
-  var
-    i: Integer;
-  begin
-    for i:=1 to Indent do
-      aStream.WriteByte(ord(' '));
-  end;
-
-  procedure WriteStr(const s: string);
-  begin
-    if s='' then exit;
-    aStream.Write(s[1],length(s));
-  end;
-
-var
-  Attr: PXDBAttribute;
-  NeedComma: Boolean;
-  Child: PXDBNode;
-  i: Integer;
-  TextID: Integer;
-begin
-  if Node is TXDBLeafNode then begin
-    WriteIndent;
-    WriteStr('#text : ');
-    WriteJSONString(TXDBLeafNode(Node).Value,aStream);
-    exit;
-  end;
-
-  // write header: "elementname" : {
-  WriteIndent;
-  WriteJSONString(Node.GetName,aStream);
-  WriteStr(' : {');
-  inc(Indent,2);
-
-  NeedComma:=false;
-  if Node is TXDBNodeWithAttributes then begin
-    // write attributes
-    Attr:=TXDBNodeWithAttributes(Node).Attributes;
-    for i:=1 to TXDBNodeWithAttributes(Node).AttributeCount do begin
-      if NeedComma then
-        aStream.WriteByte(ord(','));
-      aStream.WriteByte(10);
-      WriteIndent;
-      WriteJSONString('-'+Attr^.Name,aStream);
-      WriteStr(' : ');
-      WriteJSONString(Attr^.Value,aStream);
-      NeedComma:=true;
-      inc(Attr);
-    end;
-  end;
-
-  // write children
-  if Node is TXDBTreeNode then begin
-    Child:=TXDBTreeNode(Node).Children;
-    TextID:=0;
-    for i:=1 to TXDBTreeNode(Node).ChildCount do begin
-      if NeedComma then
-        aStream.WriteByte(ord(','));
-      aStream.WriteByte(10);
-      if Child^ is TXDBLeafNode then begin
-        inc(TextID);
-        WriteIndent;
-        WriteStr('"#text'+IntToStr(TextID)+'" : ');
-        WriteJSONString(TXDBLeafNode(Child^).Value,aStream);
-      end else begin
-        SaveNodeAsJSON(Child^,aStream,Indent+2);
-      end;
-      NeedComma:=true;
-      inc(Child);
-    end;
-  end;
-
-  // write footer: }
-  if NeedComma then begin
-    aStream.WriteByte(10);
-    dec(Indent,2);
-    WriteIndent;
-  end;
-  aStream.WriteByte(ord('}'));
-end;
-
-function NodeAsJSON(Node: TXDBNode; Indent: integer): string;
-var
-  ms: TMemoryStream;
-begin
-  ms:=TMemoryStream.Create;
-  try
-    SaveNodeAsJSON(Node,ms,Indent);
-    SetLength(Result,ms.Size);
-    if Result<>'' then
-      System.Move(ms.Memory^,Result[1],length(Result));
-  finally
-    ms.Free;
-  end;
-end;
 
 procedure WriteJSONString(const Value: string; aStream: TStream);
 // write "Value" and escape special characters
@@ -201,6 +105,173 @@ begin
     Flush;
   end;
   aStream.WriteByte(ord('"'));
+end;
+
+procedure SaveNodeAsJSON(Node: TXDBNode; aStream: TStream; Indent: integer;
+  WithEnvelope: boolean);
+
+  procedure WriteIndent;
+  var
+    i: Integer;
+  begin
+    for i:=1 to Indent do
+      aStream.WriteByte(ord(' '));
+  end;
+
+  procedure WriteStr(const s: string);
+  begin
+    if s='' then exit;
+    aStream.Write(s[1],length(s));
+  end;
+
+var
+  Attr: PXDBAttribute;
+  NeedComma: Boolean;
+  Child: PXDBNode;
+  i: Integer;
+  TextID: Integer;
+  Other: PXDBNode;
+  j: Integer;
+  ChildCount: Integer;
+  Children: PXDBNode;
+begin
+  if Node is TXDBLeafNode then begin
+    if WithEnvelope then begin
+      WriteIndent;
+      WriteStr('#text : ');
+    end;
+    WriteJSONString(TXDBLeafNode(Node).Value,aStream);
+    exit;
+  end;
+
+  if WithEnvelope then begin
+    // write header: "elementname" : {
+    WriteIndent;
+    WriteJSONString(Node.GetName,aStream);
+    WriteStr(' : {');
+    inc(Indent,2);
+  end;
+
+  NeedComma:=false;
+  if Node is TXDBNodeWithAttributes then begin
+    // write attributes
+    Attr:=TXDBNodeWithAttributes(Node).Attributes;
+    for i:=1 to TXDBNodeWithAttributes(Node).AttributeCount do begin
+      if NeedComma then
+        aStream.WriteByte(ord(','));
+      if NeedComma or WithEnvelope then
+        aStream.WriteByte(10);
+      WriteIndent;
+      WriteJSONString('-'+Attr^.Name,aStream);
+      WriteStr(' : ');
+      WriteJSONString(Attr^.Value,aStream);
+      NeedComma:=true;
+      inc(Attr);
+    end;
+  end;
+
+  // write children
+  if Node is TXDBTreeNode then begin
+    ChildCount:=TXDBTreeNode(Node).ChildCount;
+    i:=ChildCount*SizeOf(TXDBNode);
+    GetMem(Children,i);
+    try
+      Move(TXDBTreeNode(Node).Children^,Children^,i);
+      Child:=Children;
+      TextID:=0;
+      for i:=1 to ChildCount do begin
+        if Child^=nil then begin
+        end else if Child^ is TXDBLeafNode then begin
+          // a new text element => write comma, linebreak
+          if NeedComma then
+            aStream.WriteByte(ord(','));
+          if NeedComma or WithEnvelope then
+            aStream.WriteByte(10);
+          // write "#text<n>" : "text"
+          inc(TextID);
+          WriteIndent;
+          WriteStr('"#text'+IntToStr(TextID)+'" : ');
+          WriteJSONString(TXDBLeafNode(Child^).Value,aStream);
+        end else begin
+          // a new element => write comma, linebreak
+          if NeedComma then
+            aStream.WriteByte(ord(','));
+          if NeedComma or WithEnvelope then
+            aStream.WriteByte(10);
+
+          // check if there is another element with this name
+          j:=i;
+          Other:=Child;
+          repeat
+            inc(j);
+            if j>ChildCount then break;
+            inc(Other);
+          until (Other^<>nil) and (Other^.GetName=Child^.GetName);
+          if j<=ChildCount then begin
+            // multiple elements with this name => write as array
+            WriteIndent;
+            WriteJSONString(Child^.GetName,aStream);
+            WriteStr(' : [');
+            inc(Indent,2);
+            Other:=Child;
+            for j:=i to ChildCount do begin
+              if (Other^<>nil) and (Other^.GetName=Child^.GetName) then begin
+                if j>i then
+                  aStream.WriteByte(ord(','));
+                aStream.WriteByte(10);
+                WriteIndent;
+                WriteStr('{'#10);
+                SaveNodeAsJSON(Other^,aStream,Indent+2,false);
+                if Other<>Child then
+                  Other^:=nil; // mark as nil to skip
+                aStream.WriteByte(10);
+                WriteIndent;
+                WriteStr('}');
+              end;
+              inc(Other);
+            end;
+            dec(Indent,2);
+            aStream.WriteByte(10);
+            WriteIndent;
+            WriteStr(']');
+          end else begin
+            // unique element name => write as single object
+            SaveNodeAsJSON(Child^,aStream,Indent,true);
+          end;
+        end;
+        NeedComma:=true;
+        inc(Child);
+      end;
+    finally
+      FreeMem(Children);
+    end;
+  end;
+
+  if WithEnvelope then begin
+    // write footer: }
+    if NeedComma then begin
+      aStream.WriteByte(10);
+      dec(Indent,2);
+      WriteIndent;
+    end;
+    aStream.WriteByte(ord('}'));
+  end;
+end;
+
+function NodeAsJSON(Node: TXDBNode; Indent: integer = 0;
+  WithEnvelope: boolean = true): string;
+var
+  ms: TMemoryStream;
+begin
+  ms:=TMemoryStream.Create;
+  try
+    SaveNodeAsJSON(Node,ms,Indent,WithEnvelope);
+    SetLength(Result,ms.Size);
+    if Result<>'' then
+      System.Move(ms.Memory^,Result[1],length(Result));
+  finally
+    ms.Free;
+  end;
 end;
 
 end.
