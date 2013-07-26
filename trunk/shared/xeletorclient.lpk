@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <Package Version="4">
     <Name Value="XeletorClient"/>
@@ -14,7 +14,7 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="9">
+    <Files Count="10">
       <Item1>
         <Filename Value="xdbutils.pas"/>
         <UnitName Value="XDBUtils"/>
@@ -53,6 +53,10 @@
         <AddToUsesPkgSection Value="False"/>
         <UnitName Value="xdbfphttpclient"/>
       </Item9>
+      <Item10>
+        <Filename Value="xdbexport.pas"/>
+        <UnitName Value="xdbexport"/>
+      </Item10>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">

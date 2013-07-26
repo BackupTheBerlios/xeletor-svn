@@ -8,7 +8,7 @@ interface
 
 uses
   XDBUtils, XDBFiles, XDBProcess, xdblog, XFileWatch, XDBCGI, XPath_Simple, 
-  LazarusPackageIntf;
+  XDBExport, LazarusPackageIntf;
 
 implementation
 
