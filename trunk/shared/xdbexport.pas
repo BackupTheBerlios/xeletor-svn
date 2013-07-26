@@ -105,7 +105,7 @@ begin
       WriteIndent;
       WriteJSONString('-'+Attr^.Name,aStream);
       WriteStr(' : ');
-      WriteJSONString('-'+Attr^.Value,aStream);
+      WriteJSONString(Attr^.Value,aStream);
       NeedComma:=true;
       inc(Attr);
     end;
