@@ -10,7 +10,7 @@ unit XDBExport;
 interface
 
 uses
-  Classes, SysUtils, XDBFiles;
+  Classes, SysUtils, XDBFiles, LazLogger;
 
 (* SaveNodeAsJSON:
   elements are streamed by name
@@ -57,6 +57,7 @@ procedure SaveNodeAsJSON(Node: TXDBNode; aStream: TStream; Indent: integer = 0;
 function NodeAsJSON(Node: TXDBNode; Indent: integer = 0;
   WithEnvelope: boolean = true): string;
 procedure WriteJSONString(const Value: string; aStream: TStream);
+function ValueAsJSONString(const Value: string): string;
 
 implementation
 
@@ -105,6 +106,39 @@ begin
     Flush;
   end;
   aStream.WriteByte(ord('"'));
+end;
+
+function ValueAsJSONString(const Value: string): string;
+var
+  i: Integer;
+  ms: TMemoryStream;
+begin
+  if length(Value)>100 then begin
+    ms:=TMemoryStream.Create;
+    try
+      WriteJSONString(Value,ms);
+      SetLength(Result,ms.Size);
+      if Result='' then exit;
+      Move(ms.Memory^,Result[1],ms.Size);
+    finally
+      ms.Free;
+    end;
+  end else begin
+    Result:=Value;
+    // encode
+    for i:=length(Result) downto 1 do begin
+      case Result[i] of
+      #0: Delete(Result,i,1);
+      '\','/','"' : Insert('/',Result,i);
+      #8  : ReplaceSubstring(Result,i,1,'\b');
+      #9  : ReplaceSubstring(Result,i,1,'\t');
+      #10 : ReplaceSubstring(Result,i,1,'\n');
+      #12 : ReplaceSubstring(Result,i,1,'\f');
+      #13 : ReplaceSubstring(Result,i,1,'\r');
+      end;
+    end;
+    Result:='"'+Result+'"';
+  end;
 end;
 
 procedure SaveNodeAsJSON(Node: TXDBNode; aStream: TStream; Indent: integer;
