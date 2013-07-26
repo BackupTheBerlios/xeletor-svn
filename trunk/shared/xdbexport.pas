@@ -53,7 +53,7 @@ uses
     #13 : '\r'
 *)
 procedure SaveNodeAsJSON(Node: TXDBNode; aStream: TStream; Indent: integer = 0);
-function NodeAsJSON(Node: TXDBNode): string;
+function NodeAsJSON(Node: TXDBNode; Indent: integer = 0): string;
 procedure WriteJSONString(const Value: string; aStream: TStream);
 
 implementation
@@ -133,19 +133,21 @@ begin
   end;
 
   // write footer: }
-  dec(Indent,2);
-  WriteIndent;
+  if NeedComma then begin
+    aStream.WriteByte(10);
+    dec(Indent,2);
+    WriteIndent;
+  end;
   aStream.WriteByte(ord('}'));
-  aStream.WriteByte(10);
 end;
 
-function NodeAsJSON(Node: TXDBNode): string;
+function NodeAsJSON(Node: TXDBNode; Indent: integer): string;
 var
   ms: TMemoryStream;
 begin
   ms:=TMemoryStream.Create;
   try
-    SaveNodeAsJSON(Node,ms);
+    SaveNodeAsJSON(Node,ms,Indent);
     SetLength(Result,ms.Size);
     if Result<>'' then
       System.Move(ms.Memory^,Result[1],length(Result));
