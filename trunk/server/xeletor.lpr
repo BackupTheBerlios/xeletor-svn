@@ -55,9 +55,10 @@ uses
   xdbHTTPDefs, CodeToolsStructs, xdbutils, xdbfiles, xdblog, xdbcentral;
 
 const
-  Version = '1.3';
+  Version = '1.4';
   // 1.2 signals HUP, KILL, TERM, QUIT
   // 1.3 disable http action 'stop' by default
+  // 1.4 xpath count() function
 type
 
   { TAllowDenyFromItem }
@@ -629,7 +630,8 @@ begin
     +'Return an xml document with all nodes matching the path.<br>'#13#10
     +'Optionally the path can be prepended with a doc(DocPath) specifying a'
     +' DocPath for the directories/files.<br>'#13#10
-    +'Example: finddocs:doc(db1)//graphics'#13#10
+    +'Example: findnodes:doc(db1)//graphics'#13#10
+    +'Example: count(findnodes:doc(db1)//graphics)'#13#10
     +'  </li>'#13#10
 
     +'  <li>rescan<br>'#13#10
@@ -904,26 +906,38 @@ begin
     try
       Storage.BeginReading;
       try
-        Storage.Roots.FindNodes(Path,Nodes);
-        w('<?xml version="1.0" encoding="UTF-8"?>');
-        w('<nodes path="'+StrToXMLValue(Path)+'">');
-        LastRoot:=nil;
-        for i:=0 to Nodes.Count-1 do begin
-          Node:=TXDBNode(Nodes[i]);
-          CurRoot:=Node.GetRoot;
-          if CurRoot<>LastRoot then begin
-            if LastRoot<>nil then
-              w('  </file>');
-            w('  <file docpath="'+CurRoot.GetFullFilename+'">');
-            LastRoot:=CurRoot;
+        if LeftStr(Path,length('count('))='count(' then begin
+          System.Delete(Path,1,length('count('));
+          if copy(Path,length(Path),1)<>')' then begin
+            ErrorRespond(ARequest,AResponse,404,'missing closing bracket of function count');
+            exit;
           end;
-          w('    <node xpath="'+Node.GetDPath+'">');
-          Node.WriteToStream(ms,3);
-          w('    </node>');
+          System.Delete(Path,length(Path),1);
+          Storage.Roots.FindNodes(Path,Nodes);
+          w('<?xml version="1.0" encoding="UTF-8"?>');
+          w('<count path="'+StrToXMLValue(Path)+'" value="'+IntToStr(Nodes.Count)+'"/>');
+        end else begin
+          Storage.Roots.FindNodes(Path,Nodes);
+          w('<?xml version="1.0" encoding="UTF-8"?>');
+          w('<nodes path="'+StrToXMLValue(Path)+'">');
+          LastRoot:=nil;
+          for i:=0 to Nodes.Count-1 do begin
+            Node:=TXDBNode(Nodes[i]);
+            CurRoot:=Node.GetRoot;
+            if CurRoot<>LastRoot then begin
+              if LastRoot<>nil then
+                w('  </file>');
+              w('  <file docpath="'+CurRoot.GetFullFilename+'">');
+              LastRoot:=CurRoot;
+            end;
+            w('    <node xpath="'+Node.GetDPath+'">');
+            Node.WriteToStream(ms,3);
+            w('    </node>');
+          end;
+          if LastRoot<>nil then
+            w('  </file>');
+          w('</nodes>');
         end;
-        if LastRoot<>nil then
-          w('  </file>');
-        w('</nodes>');
         ms.Position:=0;
       finally
         Storage.EndReading;
